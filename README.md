@@ -1,5 +1,10 @@
-Run the code using train.py with:
+Setup the environment variable
+```
+export PYTHONPATH=/home/thymios/projects/approx_ensembles:$PYTHONPATH
+```
 
+
+Run the code using train.py with:
 ```bash
 python train.py --cfg <name of config> --gpu <which gpu to run on> --seed <a random seem to use for the run>
 ```
