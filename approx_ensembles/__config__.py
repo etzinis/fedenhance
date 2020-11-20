@@ -8,3 +8,6 @@ MNIST_LOG_PATH = os.path.join(home_folder, other_tree_path,
 
 # Datasets paths
 MNIST_PATH='/mnt/data/mnist'
+
+# Cometml your key
+API_KEY = 'Fill_me'
