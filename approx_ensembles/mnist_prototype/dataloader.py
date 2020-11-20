@@ -13,17 +13,17 @@ import skimage.util
 import random
 import matplotlib.pyplot as plt
 import os
-import
+import approx_ensembles.mnist_prototype.cmd_args_parser as cmd_args_parser
+from approx_ensembles.__config__ import MNIST_PATH, MNIST_LOG_PATH
 
 class NoisyMNIST(Dataset):
-    def __init__(self, params, train):
-        self.mnist_dset = torchvision.datasets.MNIST('../data/', train=train, download=True,
-                                                     transform=torchvision.transforms.Compose([
-                                                         torchvision.transforms.ToTensor(),
-                                                         torchvision.transforms.Normalize(
-                                                             (0.1307,), (0.3081,))
-                                                     ]))
-        self.noise_types = params['valid_noises']
+    def __init__(self, noise_types, train):
+        self.mnist_dset = torchvision.datasets.MNIST(
+            '../data/', train=train, download=True,
+            transform=torchvision.transforms.Compose(
+                [torchvision.transforms.ToTensor(),
+                 torchvision.transforms.Normalize((0.1307,), (0.3081,))]))
+        self.noise_types = noise_types
 
     @staticmethod
     def add_normal(img):
@@ -51,6 +51,8 @@ class NoisyMNIST(Dataset):
             img_noisy = self.add_salt_and_pepper(clean_np)
         elif noise_type == 'speckle':
             img_noisy = self.mult_normal(clean_np)
+        elif noise_type == 'none':
+            img_noisy = clean_np
         else:
             raise ValueError(
                 'Given noise type: {} is invalid'.format(noise_type))
@@ -62,15 +64,13 @@ class NoisyMNIST(Dataset):
 
 
 if __name__ == "__main__":
-    params = default()
+    args = cmd_args_parser.get_args()
 
-    save_dir = '../temp'
+    save_dir = os.path.join(MNIST_LOG_PATH, 'temp')
     os.makedirs(save_dir, exist_ok=True)
 
-    for noise in ['gaussian', 'salt_and_pepper', 'speckle']:
-        params['valid_noises'] = [noise]
-
-        dset = NoisyMNIST(params, train=True)
+    for noise in args.noise_type:
+        dset = NoisyMNIST([noise], train=True)
         clean, noisy, label, _ = dset[0]
         
         fig, ax = plt.subplots(1, 2)
