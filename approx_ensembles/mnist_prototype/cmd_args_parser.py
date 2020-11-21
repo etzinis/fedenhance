@@ -31,19 +31,6 @@ def get_args():
                         default=['0'],
                         choices=['0', '1', '2', '3'])
 
-    parser.add_argument("--val", type=str, nargs='+',
-                        help="Validation dataset",
-                        default=None,
-                        choices=['WSJ2MIX8K', 'WSJ2MIX8KPAD',
-                                 'TIMITMF8K', 'WSJ2MIX8KNORMPAD',
-                                 'AUGMENTED_WSJMIX', 'AUGMENTED_ESC50'])
-    parser.add_argument("--train_val", type=str, nargs='+',
-                        help="Validating on the training dataset",
-                        default=None,
-                        choices=['WSJ2MIX8K', 'WSJ2MIX8KPAD',
-                                 'TIMITMF8K', 'WSJ2MIX8KNORMPAD',
-                                 'AUGMENTED_WSJMIX', 'AUGMENTED_ESC50'])
-
     # CometML experiment parameters
     parser.add_argument("-tags", "--cometml_tags", type=str,
                         nargs="+", help="""A list of tags for the cometml 
