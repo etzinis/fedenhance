@@ -19,6 +19,10 @@ def get_args():
                         default=['salt_and_pepper', 'gaussian', 'speckle'],
                         choices=['none', 'salt_and_pepper',
                                  'gaussian', 'speckle'])
+    # Seed for controlling the initial network configuration
+    parser.add_argument("--seed", type=int,
+                        help="""The seed for initialization""", default=7)
+
     # device params
     parser.add_argument("-cad", "--cuda_available_devices", type=str,
                         nargs="+",
@@ -50,20 +54,28 @@ def get_args():
                         default=None)
     parser.add_argument("--project_name", type=str,
                         help="""Name of current experiment""",
-                        default="first_wsj02mix")
+                        default="noisy_mnist_approx_ensembles")
+    parser.add_argument("--ckpt_period", type=int,
+                        help="""The number of epochs needed for saving a 
+                        checkpoint""",
+                        default=2)
+    parser.add_argument("--num_saved_images", type=int,
+                        help="""The number of saved image results for each 
+                        noise type""",
+                        default=5)
 
     # training params
     parser.add_argument("-bs", "--batch_size", type=int,
                         help="""The number of samples in each batch. 
                             Warning: Cannot be less than the number of 
-                            the validation samples""", default=4)
+                            the validation samples""", default=32)
     parser.add_argument("--n_jobs", type=int,
                         help="""The number of cpu workers for 
                             loading the data, etc.""", default=4)
     parser.add_argument("--n_epochs", type=int,
                         help="""The number of epochs that the 
-                        experiment should run""", default=50)
+                        experiment should run""", default=5000)
     parser.add_argument("-lr", "--learning_rate", type=float,
-                        help="""Initial Learning rate""", default=1e-2)
+                        help="""Initial Learning rate""", default=2e-3)
 
     return parser.parse_args()
