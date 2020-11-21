@@ -19,7 +19,7 @@ from approx_ensembles.__config__ import MNIST_PATH, MNIST_LOG_PATH
 class NoisyMNIST(Dataset):
     def __init__(self, noise_types, train):
         self.mnist_dset = torchvision.datasets.MNIST(
-            '../data/', train=train, download=True,
+            MNIST_PATH, train=train, download=True,
             transform=torchvision.transforms.Compose(
                 [torchvision.transforms.ToTensor(),
                  torchvision.transforms.Normalize((0.1307,), (0.3081,))]))
