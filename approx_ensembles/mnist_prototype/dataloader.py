@@ -28,17 +28,17 @@ class NoisyMNIST(Dataset):
     @staticmethod
     def add_normal(img):
         return skimage.util.random_noise(img, mode='gaussian', mean=0,
-                                         var=0.05, clip=True)
+                                         var=0.5, clip=True)
 
     @staticmethod
     def add_salt_and_pepper(img):
         return skimage.util.random_noise(img, mode='s&p', salt_vs_pepper=0.5,
-                                         clip=True)
+                                         clip=True, amount=0.5)
 
     @staticmethod
     def mult_normal(img):
         return skimage.util.random_noise(img, mode='speckle', mean=0,
-                                         var=0.05, clip=True)
+                                         var=0.5, clip=True)
 
     def __getitem__(self, idx):
         img_clean, img_label = self.mnist_dset[idx]
