@@ -83,3 +83,4 @@ def plot_denoised_images(clean, noisy, pred, experiment, step, losses, labels,
                 image_format="png", image_scale=1.0, image_shape=None,
                 image_colormap=None, image_minmax=None,
                 image_channels="last", copy_to_tmp=True, step=step)
+            plt.close()
