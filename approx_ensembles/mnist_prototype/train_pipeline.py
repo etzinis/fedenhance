@@ -67,7 +67,7 @@ for noise_type in val_noise_types:
     val_losses['val_' + noise_type] = batch_l1_metric
 
 torch.manual_seed(hparams['seed'])
-model = MNISTnet()
+model = MNISTnet(n_intermediate_layers=args.n_intermediate_layers)
 model = torch.nn.DataParallel(model).cuda()
 opt = torch.optim.SGD(model.parameters(), lr=hparams['learning_rate'])
 
