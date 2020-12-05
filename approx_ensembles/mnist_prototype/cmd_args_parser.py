@@ -51,6 +51,11 @@ def get_args():
                         noise type""",
                         default=5)
 
+    # Evaluation only parameter
+    parser.add_argument("--eval_model_name", type=str,
+                        help="""Name of model or set of checkpoints saved""",
+                        default='')
+
     # training params
     parser.add_argument("-bs", "--batch_size", type=int,
                         help="""The number of samples in each batch. 
@@ -59,6 +64,10 @@ def get_args():
     parser.add_argument("--n_jobs", type=int,
                         help="""The number of cpu workers for 
                             loading the data, etc.""", default=4)
+    parser.add_argument("-nl", "--n_intermediate_layers", type=int,
+                        help="""The number of intermediate layers in the 
+                        model. If 0 then only 2 layers in total are used.""",
+                        default=4)
     parser.add_argument("--n_epochs", type=int,
                         help="""The number of epochs that the 
                         experiment should run""", default=5000)
