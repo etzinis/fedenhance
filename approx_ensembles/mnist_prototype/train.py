@@ -8,8 +8,8 @@ import torchvision
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 
-from net import MNISTnet
-from dataloader import NoisyMNIST
+from approx_ensembles.mnist_prototype.net import MNISTnet
+from approx_ensembles.mnist_prototype.dataloader import NoisyMNIST
 
 def run_validation(net, params, n_batches_seen):
     test_dataset = NoisyMNIST(params, train=False)
