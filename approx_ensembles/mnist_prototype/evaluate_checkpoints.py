@@ -151,7 +151,7 @@ if __name__ == "__main__":
                         model_name_1 = models[0],
                         model_name_2 = models[1],
                         epoch_cnt_1 = epoch_cnt, epoch_cnt_2 = epoch_cnt,
-                        data_gen=val_generators['gaussian'],
+                        data_gen=val_generators[n_type],
                         interpolation_points=interpolation_points)
 
                     savepath = os.path.join(results_dirpath,
