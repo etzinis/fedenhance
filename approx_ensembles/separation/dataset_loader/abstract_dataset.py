@@ -34,6 +34,7 @@ class Dataset:
                 print(e)
                 raise ValueError('Expected to find a dict of format: {}'
                                  ' but got: {}'.format(dict_check, value))
+            return value
 
         if known_type is not None:
             if not isinstance(value, known_type):
