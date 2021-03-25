@@ -82,7 +82,7 @@ class Dataset(torch.utils.data.Dataset, abstract_dataset.Dataset):
         for speaker_id in available_speaker_ids_ints:
             this_dirpath = os.path.join(self.dataset_dirpath, str(speaker_id))
             noise_paths = glob2.glob(this_dirpath+'/noise/*.wav')
-            speech_paths = glob2.glob(this_dirpath+'/noise/*.wav')
+            speech_paths = glob2.glob(this_dirpath+'/speech/*.wav')
             this_sources_info = [{
                 'noise_path': noise_path,
                 'speech_path': speech_path
@@ -152,11 +152,12 @@ class Dataset(torch.utils.data.Dataset, abstract_dataset.Dataset):
 
 def test_generator():
     dataset_root_p = '/mnt/data/FedEnhance/'
-    batch_size = 1
+    batch_size = 3
     sample_rate = 16000
     timelength = 4.0
     speaker_ids = [x for x in range(100)]
     time_samples = int(sample_rate * timelength)
+    max_abs_snr = 5.
     data_loader = Dataset(
         root_dirpath=dataset_root_p,
         speaker_ids=speaker_ids,
