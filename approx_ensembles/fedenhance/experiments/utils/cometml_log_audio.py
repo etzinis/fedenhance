@@ -28,7 +28,8 @@ class AudioLogger(object):
                   mix_batch,
                   experiment,
                   tag='',
-                  step=None):
+                  step=None,
+                  overwrite=False):
         """!
         :param pr_batch: Reconstructed wavs: Torch Tensor of size:
                          batch_size x num_sources x length_of_wavs
@@ -53,7 +54,7 @@ class AudioLogger(object):
             experiment.log_audio(mixture[b_ind].squeeze(),
                                  sample_rate=self.fs,
                                  file_name=tag+'batch_{}_mixture'.format(b_ind+1),
-                                 metadata=None, overwrite=False,
+                                 metadata=None, overwrite=overwrite,
                                  copy_to_tmp=True, step=step)
             for s_ind in range(self.n_sources):
                 experiment.log_audio(
@@ -61,12 +62,12 @@ class AudioLogger(object):
                     sample_rate=self.fs,
                     file_name=tag+'batch_{}_source_{}_true.wav'.format(b_ind+1,
                                                                        s_ind+1),
-                    metadata=None, overwrite=False,
+                    metadata=None, overwrite=overwrite,
                     copy_to_tmp=True, step=step)
                 experiment.log_audio(
                     pred_sources[b_ind][s_ind].squeeze(),
                     sample_rate=self.fs,
                     file_name=tag+'batch_{}_source_{}_est.wav'.format(b_ind+1,
                                                                       s_ind+1),
-                    metadata=None, overwrite=False,
+                    metadata=None, overwrite=overwrite,
                     copy_to_tmp=True, step=step)
