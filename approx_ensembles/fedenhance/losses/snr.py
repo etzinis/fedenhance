@@ -57,6 +57,9 @@ class FixedMixIT2Sources2NoisesSNRwithZeroRefs(nn.Module):
         nom = self.dot(t_batch, t_batch) + eps
         error = pr_batch - t_batch
         denom = self.dot(error, error) + denom_stabilizer + eps
+        # return 10. * activity_mask * torch.log10(nom / denom + eps) - (
+        #     (~activity_mask) * torch.abs(denom_stabilizer))
+        # return - torch.abs(error)
         return 10. * activity_mask * torch.log10(nom / denom + eps)
 
     def compute_permuted_snrs(self,
@@ -134,8 +137,45 @@ class FixedMixIT2Sources2NoisesSNRwithZeroRefs(nn.Module):
             best_snr = (self.sources_weight * best_sources_snr +
                         (1. - self.sources_weight) * best_noises_snr)
         else:
-            best_snr = None
-            raise ValueError('Not yet avaialble')
+            # For the unsupervised case take the maximum SNR by reconstructing
+            # the mixtures.
+            ref_mixtures = ref_sources_batch + ref_noises_batch
+            ref_mixtures_powers = self.dot(ref_mixtures, ref_mixtures)
+            mixtures_input_snr = 10. * torch.log10(
+                ref_mixtures_powers / (mixture_power + eps))
+            mixtures_activity_mask = mixtures_input_snr.ge(self.inactivity_threshold)
+
+            mixtures_active_stabilizer = mixtures_activity_mask * ref_mixtures_powers
+            mixtures_inactive_stabilizer = (~mixtures_activity_mask) * mixture_power_repeated
+            mixtures_denom_stabilizer = thresh * (
+                    mixtures_active_stabilizer + mixtures_inactive_stabilizer)
+            num_active_mixtures = mixtures_activity_mask.sum([-2, -1]).unsqueeze(-1)
+
+            snr_l = []
+            for perm in self.permutations:
+                permuted_pr_batch = pr_batch[:, :2][:, perm]
+                est_mixture_1 = permuted_pr_batch[:, 0:1] + pr_batch[:, 2:3]
+                est_mixture_2 = permuted_pr_batch[:, 1:2] + pr_batch[:, 3:4]
+                for ref_mix_perm in self.permutations:
+                    permuted_ref_mixtures = ref_mixtures[:, ref_mix_perm]
+                    permuted_mixtures_activity_mask = mixtures_activity_mask[:, ref_mix_perm]
+                    permuted_mixtures_denom_stabilizer = mixtures_denom_stabilizer[:, ref_mix_perm]
+                    snr_1 = self.compute_permuted_snrs_and_inactive(
+                        est_mixture_1, permuted_ref_mixtures[:, 0:1],
+                        permuted_mixtures_activity_mask[:, 0:1],
+                        permuted_mixtures_denom_stabilizer[:, 0:1], eps=eps)
+                    snr_2 = self.compute_permuted_snrs_and_inactive(
+                        est_mixture_2, permuted_ref_mixtures[:, 1:2],
+                        permuted_mixtures_activity_mask[:, 1:2],
+                        permuted_mixtures_denom_stabilizer[:, 1:2], eps=eps)
+                    # snr_reg = self.compute_permuted_snrs(
+                    #     est_mixture_2, est_mixture_1)
+                    # snr_l.append(snr_1 + snr_2 - snr_reg)
+                    snr_l.append(snr_1 + snr_2)
+            all_mix_snrs = torch.cat(snr_l, -1)
+            best_snr, _ = torch.max(
+                all_mix_snrs.sum(-2) * num_active_mixtures, -1)
+
 
         if not self.return_individual_results:
             best_snr = best_snr.mean()
