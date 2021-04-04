@@ -45,10 +45,10 @@ class AudioLogger(object):
         true_sources = t_batch.detach().cpu().numpy()
         pred_sources = pr_batch.detach().cpu().numpy()
 
-        # Normalize the audio
-        mixture = mixture / np.abs(mixture).max(-1, keepdims=True)
-        true_sources = true_sources / np.abs(true_sources).max(-1, keepdims=True)
-        pred_sources = pred_sources / np.abs(pred_sources).max(-1, keepdims=True)
+        # # Normalize the audio
+        # mixture = mixture / np.abs(mixture).max(-1, keepdims=True)
+        # true_sources = true_sources / np.abs(true_sources).max(-1, keepdims=True)
+        # pred_sources = pred_sources / np.abs(pred_sources).max(-1, keepdims=True)
 
         for b_ind in range(self.bs):
             experiment.log_audio(mixture[b_ind].squeeze(),
