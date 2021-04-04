@@ -1,5 +1,6 @@
 # Datasets paths
 LIBRI_FS50K='/mnt/data/FedEnhance/'
+CHUNK_LIBRI_FS50K='/mnt/data/ChunkFedEnhance/'
 
 # Cometml your key
-API_KEY = 'Yow42q3eJpplGX38yJwsA7Lz5'
+API_KEY = 'place_your_cometml_key_here'
