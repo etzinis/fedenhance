@@ -95,6 +95,7 @@ class MixITLossWrapper(nn.Module):
         """
         nmix = targets.shape[1]
         nsrc = est_targets.shape[1]
+        nsrc = 4
         if nsrc % nmix != 0:
             raise ValueError("The mixtures are assumed to contain the same number of sources")
         nsrcmix = nsrc // nmix
