@@ -24,6 +24,12 @@ def get_args():
                         default=False)
     # ===============================================
     # Separation task arguments
+    parser.add_argument("--available_speech_percentage", type=float,
+                        help="""The percentage of available speech 
+                        utterances assuming a 1:1 mapping with noises. The 
+                        rest of the available speech files are going to be 
+                        randomly returned as extra noise.""",
+                        default=0.5)
     parser.add_argument("--min_num_sources", type=int,
                         help="""The minimum number of sources in a mixture.""",
                         default=1)
