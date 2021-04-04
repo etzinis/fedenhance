@@ -314,7 +314,7 @@ class GroupCommSudoRmRf(nn.Module):
                    self.num_sources * self.in_audio_channels,
                    self.enc_num_basis, -1)
         x = self.mask_nl_class(x)
-        # x = x * s.unsqueeze(1)
+        x = x * s.unsqueeze(1)
         # Back end
         estimated_waveforms = self.decoder(x.view(x.shape[0], -1, x.shape[-1]))
         return self.remove_trailing_zeros(estimated_waveforms, input_wav)
