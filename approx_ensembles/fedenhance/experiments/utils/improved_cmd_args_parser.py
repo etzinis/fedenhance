@@ -30,6 +30,13 @@ def get_args():
                         rest of the available speech files are going to be 
                         randomly returned as extra noise.""",
                         default=0.5)
+    parser.add_argument("--p_supervised", type=float,
+                        help="""The percentage of supervised examples.""",
+                        default=0.5)
+    parser.add_argument("--p_single_mix", type=float,
+                        help="""The percentage of single mixtures during 
+                        training.""",
+                        default=0.5)
     parser.add_argument("--min_num_sources", type=int,
                         help="""The minimum number of sources in a mixture.""",
                         default=1)
