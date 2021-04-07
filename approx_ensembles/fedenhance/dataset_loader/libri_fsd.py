@@ -72,6 +72,7 @@ class Dataset(torch.utils.data.Dataset, abstract_dataset.Dataset):
             'speaker_ids', known_type=list)
         # Create the indexing for the dataset.
         available_speaker_ids = os.listdir(self.dataset_dirpath)
+        self.all_available_speaker_ids = os.listdir(self.dataset_dirpath)
         sorted_speaker_ids_ints = sorted(map(int, available_speaker_ids))
         available_speaker_ids_ints = sorted_speaker_ids_ints
         if self.speaker_ids:
