@@ -44,6 +44,18 @@ def get_args():
                         help="""The maximum number of sources in a mixture.""",
                         default=4)
     # ===============================================
+    # Federated learning parameters
+    parser.add_argument("--n_fed_nodes", type=int,
+                        help="""The number of federated nodes.""", default=10)
+    parser.add_argument("--p_available_users", type=float,
+                        help="""The number of available nodes per 
+                        communication round as a percentage.""",
+                        default=1.)
+    parser.add_argument("--local_epoch_p", type=float,
+                        help="""The percentage of a full iteration of 
+                        available data in each local federated node.""",
+                        default=1.)
+    # ===============================================
     # Training params
     parser.add_argument("-bs", "--batch_size", type=int,
                         help="""The number of samples in each batch. 
@@ -52,9 +64,6 @@ def get_args():
     parser.add_argument("--n_global_epochs", type=int,
                         help="""The number of epochs that all the nodes will
                         be trained on.""", default=500)
-    parser.add_argument("--n_local_epochs", type=int,
-                        help="""The number of epochs that each node runs 
-                        before communicating the update.""", default=1)
     parser.add_argument("-lr", "--learning_rate", type=float,
                         help="""Initial Learning rate""", default=1e-3)
     parser.add_argument("--divide_lr_by", type=float,
