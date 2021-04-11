@@ -37,6 +37,10 @@ def get_args():
                         help="""The percentage of single mixtures during 
                         training.""",
                         default=0.5)
+    parser.add_argument("--selected_node_ids", type=int,
+                        nargs="+", help="""Selected node ids used for this 
+                        experiment.""",
+                        default=[])
     parser.add_argument("--min_num_sources", type=int,
                         help="""The minimum number of sources in a mixture.""",
                         default=1)
