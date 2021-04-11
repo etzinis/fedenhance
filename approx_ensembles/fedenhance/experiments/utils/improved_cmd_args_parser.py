@@ -109,7 +109,7 @@ def get_args():
                         help="""A list of Cuda IDs that would be 
                             available for running this experiment""",
                         default=['0'],
-                        choices=['0', '1', '2', '3'])
+                        choices=['0', '1', '2', '3', '4', '5', '6', '7'])
     parser.add_argument("--n_jobs", type=int,
                         help="""The number of cpu workers for 
                                         loading the data, etc.""", default=4)
