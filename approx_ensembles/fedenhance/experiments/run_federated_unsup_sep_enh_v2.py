@@ -165,6 +165,7 @@ def my_mixit(rec_sources_wavs, input_active_speakers, input_noises,
 
 def sup_sisdr(rec_sources_wavs, input_active_speakers, input_noises, input_mom):
     ref_speech = normalize_tensor_wav(input_active_speakers)
+    ref_noises = normalize_tensor_wav(input_noises)
 
     ref_speech_powers = torch.sum(input_active_speakers ** 2, dim=-1,
                                   keepdim=True)
@@ -173,10 +174,20 @@ def sup_sisdr(rec_sources_wavs, input_active_speakers, input_noises, input_mom):
         ref_speech_powers / (input_mom_powers + 1e-9))
     ref_speech_activity_mask = mixtures_input_snr.ge(0.001)
 
-    error = ref_speech_activity_mask * torch.clamp(
+    speech_error = ref_speech_activity_mask * torch.clamp(
         asteroid_sdr_lib.pairwise_neg_sisdr(
             rec_sources_wavs[:, 0:1], ref_speech), min=-50., max=50.)
-    return torch.mean(error)
+
+    ref_noise_powers = torch.sum(input_noises ** 2, dim=-1, keepdim=True)
+    mixtures_input_snr = 10. * torch.log10(
+        ref_noise_powers / (input_mom_powers + 1e-9))
+    ref_noise_activity_mask = mixtures_input_snr.ge(0.001)
+
+    noise_error = ref_noise_activity_mask * torch.clamp(
+        asteroid_sdr_lib.pairwise_neg_sisdr(
+            rec_sources_wavs[:, 1:], ref_noises), min=-50., max=50.)
+
+    return torch.mean(torch.sum(speech_error, -1) + torch.sum(noise_error, -1))
 
 
 def ast_mixit(rec_sources_wavs, input_active_speakers, input_noises, input_mom):
