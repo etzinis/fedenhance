@@ -400,6 +400,39 @@ for i in range(hparams['n_global_epochs']):
 
     val_step += 1
 
+    # Save the best available model for later use.
+    best_metrics_now = {}
+    for num_noises in [1, 2]:
+        loss_name = 'val_SISDRi_enhancement_{}_noises'.format(num_noises)
+        one_noise_metric = np.array(res_dic[loss_name]['acc']).mean()
+        best_metrics_now[num_noises] = round(one_noise_metric, 2)
+
+    best_model_paths = os.listdir(log_dir)
+    if best_model_paths:
+        for best_model_name in best_model_paths:
+            if best_model_name.startswith('best_1_noises'):
+                num_noises = 1
+                existing_metric = float(best_model_name.split('_')[-2])
+            else:
+                num_noises = 2
+                existing_metric = float(best_model_name.split('_')[-1])
+
+            if existing_metric < best_metrics_now[num_noises]:
+                new_best_model_name = f'best_{num_noises}_noises_valSISDRi_' \
+                                      f'1_{best_metrics_now[1]}_' \
+                                      f'2_{best_metrics_now[2]}'
+                torch.save(global_model.state_dict(),
+                           os.path.join(log_dir, new_best_model_name))
+                # Remove the old model.
+                os.remove(os.path.join(log_dir, best_model_name))
+    else:
+        for num_noises in [1, 2]:
+            best_model_name = f'best_{num_noises}_noises_valSISDRi_' \
+                              f'1_{best_metrics_now[1]}_' \
+                              f'2_{best_metrics_now[2]}'
+            torch.save(global_model.state_dict(),
+                       os.path.join(log_dir, best_model_name))
+
     res_dic = cometml_report.report_losses_mean_and_std(res_dic,
                                                         experiment,
                                                         tr_step,
