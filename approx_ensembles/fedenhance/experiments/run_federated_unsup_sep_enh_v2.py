@@ -277,62 +277,68 @@ for i in range(hparams['n_global_epochs']):
                     param_group['lr'] = new_lr
         max_local_steps = int(hparams['local_epoch_p'] *
                               len(node_dic['train_generator']))
-        train_tqdm_gen = tqdm(node_dic['train_generator'],
-                              desc=f"Training node: {node_dic['node_id']}")
-        for cnt, data in enumerate(train_tqdm_gen):
-            local_opt.zero_grad()
-            # data: <speech> (batch, time_samples), <noise> (batch, time_samples)
-            input_active_speakers, noise_wavs, extra_noise_wavs = data
-            input_active_speakers = input_active_speakers.unsqueeze(1)
-            input_noises = torch.stack([noise_wavs, extra_noise_wavs], 1)
+        if hparams['local_epoch_p'] > 1:
+            num_lcl_epochs = int(hparams['local_epoch_p'])
+        else:
+            num_lcl_epochs = 1
 
-            # Create a mask for zeroing out the second noise.
-            zero_out_mask = (torch.rand([hparams['batch_size'], 1]) >
-                             hparams['p_single_mix']).to(torch.float32)
-            # Zero out mixture equal probability to zero out a noise mixture or
-            # the mixture also containing the speaker.
-            if (torch.rand([1]) < 0.5).item():
-                input_noises[:, 1] = input_noises[:, 1] * zero_out_mask
-            else:
-                input_noises[:, 0] = input_noises[:, 0] * zero_out_mask
-                input_active_speakers[:, 0] = input_active_speakers[:, 0] * zero_out_mask
+        for lcl_ep_idx in range(num_lcl_epochs):
+            train_tqdm_gen = tqdm(node_dic['train_generator'],
+                                  desc=f"Training node: {node_dic['node_id']}")
+            for cnt, data in enumerate(train_tqdm_gen):
+                local_opt.zero_grad()
+                # data: <speech> (batch, time_samples), <noise> (batch, time_samples)
+                input_active_speakers, noise_wavs, extra_noise_wavs = data
+                input_active_speakers = input_active_speakers.unsqueeze(1)
+                input_noises = torch.stack([noise_wavs, extra_noise_wavs], 1)
 
-            input_active_speakers = input_active_speakers.cuda()
-            input_noises = input_noises.cuda()
+                # Create a mask for zeroing out the second noise.
+                zero_out_mask = (torch.rand([hparams['batch_size'], 1]) >
+                                 hparams['p_single_mix']).to(torch.float32)
+                # Zero out mixture equal probability to zero out a noise mixture or
+                # the mixture also containing the speaker.
+                if (torch.rand([1]) < 0.5).item():
+                    input_noises[:, 1] = input_noises[:, 1] * zero_out_mask
+                else:
+                    input_noises[:, 0] = input_noises[:, 0] * zero_out_mask
+                    input_active_speakers[:, 0] = input_active_speakers[:, 0] * zero_out_mask
 
-            input_mom = input_active_speakers.sum(1, keepdim=True) + input_noises.sum(1, keepdim=True)
-            input_mom = input_mom.cuda()
+                input_active_speakers = input_active_speakers.cuda()
+                input_noises = input_noises.cuda()
 
-            input_mix_std = input_mom.std(-1, keepdim=True)
-            input_mix_mean = input_mom.mean(-1, keepdim=True)
-            input_mom = (input_mom - input_mix_mean) / (input_mix_std + 1e-9)
+                input_mom = input_active_speakers.sum(1, keepdim=True) + input_noises.sum(1, keepdim=True)
+                input_mom = input_mom.cuda()
 
-            rec_sources_wavs = local_model(input_mom)
-            # rec_sources_wavs = (rec_sources_wavs * input_mix_std) + input_mix_mean
-            rec_sources_wavs = mixture_consistency.apply(rec_sources_wavs,
-                                                         input_mom)
+                input_mix_std = input_mom.std(-1, keepdim=True)
+                input_mix_mean = input_mom.mean(-1, keepdim=True)
+                input_mom = (input_mom - input_mix_mean) / (input_mix_std + 1e-9)
 
-            # Percentage of supervised data.
-            p_supervised = hparams['p_supervised']
-            if (torch.rand([1]) < p_supervised).item():
-                l = sup_sisdr(rec_sources_wavs, input_active_speakers,
-                              input_noises, input_mom)
-            else:
-                l = ast_mixit(rec_sources_wavs, input_active_speakers,
-                              input_noises, input_mom)
-            l.backward()
+                rec_sources_wavs = local_model(input_mom)
+                # rec_sources_wavs = (rec_sources_wavs * input_mix_std) + input_mix_mean
+                rec_sources_wavs = mixture_consistency.apply(rec_sources_wavs,
+                                                             input_mom)
 
-            if hparams['clip_grad_norm'] > 0:
-                torch.nn.utils.clip_grad_norm_(local_model.parameters(),
-                                               hparams['clip_grad_norm'])
+                # Percentage of supervised data.
+                p_supervised = hparams['p_supervised']
+                if (torch.rand([1]) < p_supervised).item():
+                    l = sup_sisdr(rec_sources_wavs, input_active_speakers,
+                                  input_noises, input_mom)
+                else:
+                    l = ast_mixit(rec_sources_wavs, input_active_speakers,
+                                  input_noises, input_mom)
+                l.backward()
 
-            local_opt.step()
-            sum_global_loss += l.detach().item()
-            train_tqdm_gen.set_description(
-                "Training Node:{}, Avg Loss: {}".format(train_node_id,
-                    sum_global_loss / ((cnt + 1) * (train_node_id + 1))))
-            if cnt > max_local_steps:
-                break
+                if hparams['clip_grad_norm'] > 0:
+                    torch.nn.utils.clip_grad_norm_(local_model.parameters(),
+                                                   hparams['clip_grad_norm'])
+
+                local_opt.step()
+                sum_global_loss += l.detach().item()
+                train_tqdm_gen.set_description(
+                    "Training Node:{}, Avg Loss: {}".format(train_node_id,
+                        sum_global_loss / ((cnt + 1) * (train_node_id + 1))))
+                if cnt > max_local_steps:
+                    break
         local_weights.append(local_model.state_dict())
     # Made the local updates and now communicate the updates back to
     # the server.
