@@ -7,7 +7,10 @@
 import os
 from approx_ensembles.fedenhance.__config__ import LIBRI_FS50K
 from approx_ensembles.fedenhance.__config__ import CHUNK_LIBRI_FS50K
+from approx_ensembles.fedenhance.__config__ import CHUNK_WHAM_ENH
 import approx_ensembles.fedenhance.dataset_loader.libri_fsd as libri_fsd
+import approx_ensembles.fedenhance.dataset_loader.wham_chunk as \
+    wham_chunk
 import approx_ensembles.fedenhance.dataset_loader.chunked_libri_fsd as \
     chunked_libri_fsd
 
@@ -38,6 +41,26 @@ def mixit_setup(hparams):
             zero_pad=True, augment=data_split=='train')
         generators[data_split] = data_loader.get_generator(
             batch_size=2*hparams['batch_size'],
+            num_workers=hparams['n_jobs'])
+    return generators
+
+def pretrain_enhancement_single_node_setup(hparams):
+    # Create all generators
+    generators = {}
+    for data_split in ['train', 'val', 'test']:
+        if data_split == 'train':
+            available_speech_percentage = hparams['available_speech_percentage']
+        else:
+            available_speech_percentage = 0.5
+        data_loader = wham_chunk.Dataset(
+            root_dirpath=CHUNK_WHAM_ENH,
+            speaker_ids=[],
+            available_speech_percentage=available_speech_percentage,
+            split=data_split, sample_rate=hparams['fs'],
+            timelength=hparams['audio_timelength'],
+            zero_pad=True, augment=data_split=='train')
+        generators[data_split] = data_loader.get_generator(
+            batch_size=hparams['batch_size'],
             num_workers=hparams['n_jobs'])
     return generators
 
