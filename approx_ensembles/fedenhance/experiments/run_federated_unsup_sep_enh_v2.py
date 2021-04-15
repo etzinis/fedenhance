@@ -79,6 +79,9 @@ unsup_back_loss_tr_loss_name, unsup_back_loss_tr_loss = (
                                generalized=False)
 )
 
+supervised_ast_loss = asteroid_sdr_lib.PITLossWrapper(
+    asteroid_sdr_lib.pairwise_neg_sisdr, pit_from='pw_mtx')
+
 
 val_losses = {}
 all_losses = []
@@ -163,31 +166,43 @@ def my_mixit(rec_sources_wavs, input_active_speakers, input_noises,
     return torch.mean(torch.min(errors, 1)[0])
 
 
-def sup_sisdr(rec_sources_wavs, input_active_speakers, input_noises, input_mom):
+def sup_sisdr(rec_sources_wavs, input_active_speakers, input_noises,
+              input_mom, use_activity_masks):
     ref_speech = normalize_tensor_wav(input_active_speakers)
     ref_noises = normalize_tensor_wav(input_noises)
 
-    ref_speech_powers = torch.sum(input_active_speakers ** 2, dim=-1,
-                                  keepdim=True)
-    input_mom_powers = torch.sum(input_mom ** 2, dim=-1, keepdim=True)
-    mixtures_input_snr = 10. * torch.log10(
-        ref_speech_powers / (input_mom_powers + 1e-9))
-    ref_speech_activity_mask = mixtures_input_snr.ge(0.001)
+    if use_activity_masks:
+        ref_speech_powers = torch.sum(input_active_speakers ** 2, dim=-1,
+                                      keepdim=True)
+        input_mom_powers = torch.sum(input_mom ** 2, dim=-1, keepdim=True)
+        mixtures_input_snr = 10. * torch.log10(
+            ref_speech_powers / (input_mom_powers + 1e-9))
+        ref_speech_activity_mask = mixtures_input_snr.ge(0.001)
 
-    speech_error = ref_speech_activity_mask * torch.clamp(
-        asteroid_sdr_lib.pairwise_neg_sisdr(
-            rec_sources_wavs[:, 0:1], ref_speech), min=-50., max=50.)
+        ref_noise_powers = torch.sum(input_noises ** 2, dim=-1,
+                                     keepdim=True)
+        mixtures_input_snr = 10. * torch.log10(
+            ref_noise_powers / (input_mom_powers + 1e-9))
+        ref_noise_activity_mask = mixtures_input_snr.ge(0.001)
 
-    ref_noise_powers = torch.sum(input_noises ** 2, dim=-1, keepdim=True)
-    mixtures_input_snr = 10. * torch.log10(
-        ref_noise_powers / (input_mom_powers + 1e-9))
-    ref_noise_activity_mask = mixtures_input_snr.ge(0.001)
+        speech_error = ref_speech_activity_mask * torch.clamp(
+            asteroid_sdr_lib.pairwise_neg_sisdr(
+                rec_sources_wavs[:, 0:1], ref_speech), min=-50., max=50.)
 
-    noise_error = ref_noise_activity_mask * torch.clamp(
-        asteroid_sdr_lib.pairwise_neg_sisdr(
-            rec_sources_wavs[:, 1:], ref_noises), min=-50., max=50.)
+        noise_error = ref_noise_activity_mask * torch.clamp(
+            supervised_ast_loss(
+                rec_sources_wavs[:, 1:], ref_noises), min=-50., max=50.)
+    else:
+        speech_error = torch.clamp(
+            asteroid_sdr_lib.pairwise_neg_sisdr(
+                rec_sources_wavs[:, 0:1], ref_speech), min=-50.,
+            max=50.)
 
-    return torch.mean(torch.sum(speech_error, -1) + torch.sum(noise_error, -1))
+        noise_error = torch.clamp(
+            supervised_ast_loss(
+                rec_sources_wavs[:, 1:], ref_noises), min=-50., max=50.)
+
+    return speech_error.mean() + noise_error
 
 
 def ast_mixit(rec_sources_wavs, input_active_speakers, input_noises, input_mom):
@@ -322,7 +337,8 @@ for i in range(hparams['n_global_epochs']):
                 p_supervised = hparams['p_supervised']
                 if (torch.rand([1]) < p_supervised).item():
                     l = sup_sisdr(rec_sources_wavs, input_active_speakers,
-                                  input_noises, input_mom)
+                                  input_noises, input_mom,
+                                  use_activity_masks=False)
                 else:
                     l = ast_mixit(rec_sources_wavs, input_active_speakers,
                                   input_noises, input_mom)
