@@ -333,9 +333,9 @@ for i in range(hparams['n_global_epochs']):
                 rec_sources_wavs = mixture_consistency.apply(rec_sources_wavs,
                                                              input_mom)
 
-                # Percentage of supervised data.
-                p_supervised = hparams['p_supervised']
-                if (torch.rand([1]) < p_supervised).item():
+                # If the node is supervised then use the appropriate
+                # loss.
+                if node_dic['is_supervised']:
                     l = sup_sisdr(rec_sources_wavs, input_active_speakers,
                                   input_noises, input_mom,
                                   use_activity_masks=False)
