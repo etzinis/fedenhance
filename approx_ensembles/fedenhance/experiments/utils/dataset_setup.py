@@ -47,7 +47,7 @@ def mixit_setup(hparams):
 def pretrain_enhancement_single_node_setup(hparams):
     # Create all generators
     generators = {}
-    for data_split in ['train', 'val', 'test']:
+    for data_split in ['train', 'val']:
         if data_split == 'train':
             available_speech_percentage = hparams['available_speech_percentage']
         else:
