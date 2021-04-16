@@ -116,6 +116,11 @@ if hparams['model_type'] == 'sudo_groupcomm_v2':
 else:
     raise ValueError('Invalid model: {}.'.format(hparams['model_type']))
 
+# Load the pre-trained model if it is given.
+if hparams['warmup_checkpoint'] is not None:
+    model.load_state_dict(
+        torch.load(hparams['warmup_checkpoint']))
+
 numparams = 0
 for f in model.parameters():
     if f.requires_grad:
