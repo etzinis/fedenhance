@@ -360,7 +360,6 @@ for i in range(hparams['n_global_epochs']):
                         sum_global_loss / ((cnt + 1) * (train_node_id + 1))))
                 if cnt > max_local_steps:
                     break
-                break
         local_weights.append(local_model.state_dict())
     # Made the local updates and now communicate the updates back to
     # the server.
