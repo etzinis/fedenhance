@@ -319,7 +319,7 @@ for i in range(hparams['n_global_epochs']):
     tr_step += 1
 
     for val_set in [x for x in generators if not x == 'train']:
-        if generators[val_set] is None or val_set == 'test':
+        if generators[val_set] is None:
             continue
         model.eval()
         with torch.no_grad():
