@@ -90,6 +90,10 @@ def get_args():
     parser.add_argument("--max_abs_snr", type=float,
                         help="""The maximum absolute value of the SNR of 
                                 the mixtures.""", default=5.)
+    parser.add_argument("--warmup_checkpoint", type=str,
+                        help="""The absolute path of a pre-trained 
+                        model that will be used for warm start.""",
+                        default=None)
     # ===============================================
     # CometML experiment configuration arguments
     parser.add_argument("-tags", "--cometml_tags", type=str,
