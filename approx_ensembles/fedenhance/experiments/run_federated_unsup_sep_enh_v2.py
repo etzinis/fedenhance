@@ -118,6 +118,11 @@ if hparams['model_type'] == 'sudo_groupcomm_v2':
 else:
     raise ValueError('Invalid model: {}.'.format(hparams['model_type']))
 
+# Load the pre-trained model if it is given.
+if hparams['warmup_checkpoint'] is not None:
+    global_model.load_state_dict(
+        torch.load(hparams['warmup_checkpoint']))
+
 numparams = 0
 for f in global_model.parameters():
     if f.requires_grad:
@@ -355,6 +360,7 @@ for i in range(hparams['n_global_epochs']):
                         sum_global_loss / ((cnt + 1) * (train_node_id + 1))))
                 if cnt > max_local_steps:
                     break
+                break
         local_weights.append(local_model.state_dict())
     # Made the local updates and now communicate the updates back to
     # the server.
