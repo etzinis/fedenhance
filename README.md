@@ -1,2 +1,2 @@
 # fedenhance
-Code for the paper: Separate but TOGETHER: UNSUPERVISED FEDERATED LEARNING FOR SPEECH ENHANCEMENT FROM NON-IID DATA
+Code for the paper: "Separate but Together: Unsupervised Federated Learning for Speech Enhancement from Non-IID Data"
