@@ -7,4 +7,4 @@ CHUNK_WHAM_ENH='/mnt/data/PreFedEnhance/'
 FED_LOG_DIR='/home/thymios/fedenhance_log/'
 
 # Cometml your key
-API_KEY = 'RJlDCKh8TVXGJTG3ChR3GaY6s'
+API_KEY = 'place_your_cometml_key_here'
