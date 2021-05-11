@@ -37,7 +37,29 @@ Convergence of FedEnhance on LibriFSD50K test set with two active noise sources 
 Speech enhancement performance on LibriFSD50K validation and test sets with one or two active noise sources while sweeping the number of supervised nodes from totally unsupervised FL (left) to totally supervised FL (right).
 
 ## Datasets Generation
-Stay tuned!
+
+
+To make the libriFSD50k dataset
+
+1. Download and organize all the data.
+```shell
+cd fedenhance/dataset_maker
+./get_libri.sh <download_dir>
+```
+2. Generate the libriFSD50k dataset using the downloaded data
+```shell
+python make_librifsd50k.py --download_dir <download_dir> --out_dir <librifsd50k_output_dir>
+```
+
+To make the WHAM pretraining dataset
+1. Download and generate WHAM. This assumes you already have a copy of the WSJ dataset.
+```shell
+get_wham.sh <dir_of /wsj0-mix/wsj> <wham_output_dir>
+```
+2. Generate federated WHAM
+```shell
+python make_fed_wham.py --wham_dir <wham_output_dir/wav16k/max> --out_dir <fedwham_output_dir>
+```
 
 
 ## How to run
