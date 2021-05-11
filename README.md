@@ -38,29 +38,26 @@ Speech enhancement performance on LibriFSD50K validation and test sets with one 
 
 ## Datasets Generation
 
-
-To make the libriFSD50k dataset
-
+To make the libriFSD50k dataset:
 1. Download and organize all the data.
 ```shell
 cd fedenhance/dataset_maker
 ./get_libri.sh <download_dir>
 ```
-2. Generate the libriFSD50k dataset using the downloaded data
+2. Generate the libriFSD50k dataset using the downloaded data.
 ```shell
 python make_librifsd50k.py --download_dir <download_dir> --out_dir <librifsd50k_output_dir>
 ```
 
-To make the WHAM pretraining dataset
+To make the WHAM pretraining dataset:
 1. Download and generate WHAM. This assumes you already have a copy of the WSJ dataset.
 ```shell
 get_wham.sh <dir_of /wsj0-mix/wsj> <wham_output_dir>
 ```
-2. Generate federated WHAM
+2. Generate federated WHAM.
 ```shell
 python make_fed_wham.py --wham_dir <wham_output_dir/wav16k/max> --out_dir <fedwham_output_dir>
 ```
-
 
 ## How to run
 
