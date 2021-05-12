@@ -14,7 +14,7 @@ FedEnhance uses mixture invariant training (MixIT) [[4]](#1) to perform the loca
 ## Table of contents
 
 - [Fedenhance results](#fedenhance-results)
-- [Datasets Generation](#datasets-generation)
+- [LibriFSD50K Dataset Generation](#librifsd50k-dataset-generation)
 - [How to run](#how-to-run)
 - [References](#references)
 - [Copyright and license](#copyright-and-license)
@@ -36,9 +36,9 @@ Convergence of FedEnhance on LibriFSD50K test set with two active noise sources 
 
 Speech enhancement performance on LibriFSD50K validation and test sets with one or two active noise sources while sweeping the number of supervised nodes from totally unsupervised FL (left) to totally supervised FL (right).
 
-## Datasets Generation
+## LibriFSD50K Dataset Generation
 
-To make the libriFSD50k dataset:
+To make the LibriFSD50k dataset:
 1. Download and organize all the data.
 ```shell
 cd fedenhance/dataset_maker
@@ -88,7 +88,7 @@ python run_federated.py \
 First pre-train for a few epochs on WHAM.
 ```shell
 cd fedenhance/experiments
-python run_federated.py \
+python run_pretraining.py \
 --n_global_epochs 50000 --model_type sudo_groupcomm_v2 \
 --enc_kernel_size 41 --out_channels 256 --enc_num_basis 512 --in_channels 512 --num_blocks 8 \
 --learning_rate 0.001 -bs 6 --divide_lr_by 2. --patience 0 --clip_grad_norm 5. --optimizer adam -cad 0 \
@@ -96,13 +96,13 @@ python run_federated.py \
 --p_supervised 1.0 --available_speech_percentage 0.5 --p_single_mix 0.0
 ```
 
-Then finetune on LibriFSD50K with 64 clients assuming that the WHAM pre-trained model has been trained for 100 epochs.
+Then finetune on LibriFSD50K with 64 clients assuming that the WHAM pre-trained model has been trained for 100 epochs. We also reduce the learning rate on the local training setups to 0.0001.
 ```shell
 cd fedenhance/experiments
 python run_federated.py \
 --n_global_epochs 50000 --model_type sudo_groupcomm_v2 \
 --enc_kernel_size 41 --out_channels 256 --enc_num_basis 512 --in_channels 512 --num_blocks 8 \
---learning_rate 0.001 -bs 6 --divide_lr_by 2. --patience 0 --clip_grad_norm 5. --optimizer adam -cad 0 \
+--learning_rate 0.0001 -bs 6 --divide_lr_by 2. --patience 0 --clip_grad_norm 5. --optimizer adam -cad 0 \
 --audio_timelength 4. --max_num_sources 3 --project_name fedenhance -tags a_pretrained_model --cometml_log_audio \
 --n_fed_nodes 256 --p_supervised 0.0 --available_speech_percentage 0.5 --p_single_mix 0.0 --p_available_users 0.25 \
 --warmup_checkpoint=/home/thymios/fedenhance_log/a_pretrained_model/model_epoch_100
@@ -113,17 +113,21 @@ You can easily simulate conditions where some of the nodes have supervised data 
 --p_supervised 0.0
 ```
 
+The parameter _available_speech_percentage_ controls the number of available speech utterances wrt the 1:1 mapping needed with the noisy recordings from FSD50k.  
+```shell
+--available_speech_percentage 0.5
+```
 
-3. Run a federated learning experiment with all nodes unsupervised. 
+5. In order to see the difference when training with individual nodes on LibriFSD50K. Here we select 5 random client ids 0, 1, 2, -1 and -2.
 
 ```shell
 cd fedenhance/experiments
-python run_federated.py \
+python run_individual.py \
 --n_global_epochs 50000 --model_type sudo_groupcomm_v2 \
 --enc_kernel_size 41 --out_channels 256 --enc_num_basis 512 --in_channels 512 --num_blocks 8 \
 --learning_rate 0.001 -bs 6 --divide_lr_by 2. --patience 0 --clip_grad_norm 5. --optimizer adam -cad 0 \
---audio_timelength 4. --max_num_sources 3 --project_name fedenhance -tags fedenhance_is_the_best \
---n_fed_nodes 16 --p_supervised 0.25 --available_speech_percentage 0.5 --p_single_mix 0.0 --p_available_users 0.25
+--audio_timelength 4. --max_num_sources 3 --project_name fedenhance -tags unsupervised_fedenhance_rocks --cometml_log_audio \
+--n_fed_nodes 256 --p_supervised 0.0 --available_speech_percentage 0.5 --p_single_mix 0.0 --p_available_users 0.25 --selected_node_ids 0 1 2 -1 -2
 ```
 
 ## References
