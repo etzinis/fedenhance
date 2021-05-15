@@ -2,6 +2,9 @@
 
 TLDR; The main contribution of this paper is to develop a federated learning (FL) system which is capable of learning a sound separation model when noisy speech recordings are distributed in a non-IID fashion across multiple clients. The overall system works without relying on several common assumptions such as: a) clients having access to supervised data and b) assuming IID distribution of the data across the clients.
 
+arXiv: https://arxiv.org/abs/2105.04727
+pdf: https://arxiv.org/pdf/2105.04727.pdf
+
 Specifically, we make the following contributions:
 
 1. We provide the first completely unsupervised system which is capable to be trained in a federated learning fashion for speech enhancement.
