@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# RUN THIS WITH ./get_libri.sh /dir_to_download_in
+# RUN THIS WITH ./get_librifsd50k.sh /dir_to_download_in
 
 # make the download directory
 mkdir -p $1
