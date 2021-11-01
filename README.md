@@ -2,8 +2,21 @@
 
 TLDR; The main contribution of this paper is to develop a federated learning (FL) system which is capable of learning a sound separation model when noisy speech recordings are distributed in a non-IID fashion across multiple clients. The overall system works without relying on several common assumptions such as: a) clients having access to supervised data and b) assuming IID distribution of the data across the clients.
 
+[![YouTube FedEnhance presentation](http://img.youtube.com/vi/nJ8knZGaUKg/0.jpg)](https://www.youtube.com/watch?v=nJ8knZGaUKg "Fedenhance presentation")
+
 arXiv: https://arxiv.org/abs/2105.04727
 pdf: https://arxiv.org/pdf/2105.04727.pdf
+
+Please cite as:
+```BibTex
+@inproceedings{tzinis2021separate,
+  title={Separate but Together: Unsupervised Federated Learning for Speech Enhancement from Non-IID Data},
+  author={Tzinis, Efthymios and Casebeer, Jonah and Wang, Zhepei and Smaragdis, Paris},
+  booktitle={2021 IEEE Workshop on Applications of Signal Processing to Audio and Acoustics (WASPAA)},
+  year={2021},
+  organization={IEEE}
+}
+```
 
 Specifically, we make the following contributions:
 
